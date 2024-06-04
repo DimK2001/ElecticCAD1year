@@ -16,7 +16,7 @@ namespace FormsElectronicCAD
         private int elementToSpawn = -1;
 
         private List<Element> elements = new List<Element>();
-        private List<List<Point>> tracks = new List<List<Point>>();
+        private List<Point[]> tracks = new List<Point[]>();
         private bool[,] obstacles;
         private List<ConnectionData> connections = new List<ConnectionData>();
         private int prevX = -1;
@@ -136,14 +136,19 @@ namespace FormsElectronicCAD
                     gr.FillRectangle(new SolidBrush(Color.DarkGreen), _rect);
                 }
             }
+
+            int width = 5;
             foreach (var track in tracks)
             {
+                List<Point> points = new List<Point>();
                 foreach (Point point in track)
                 {
-                    _rect = new Rectangle(point.X * 10 + standartOffset, point.Y * 10 + standartOffset, 10, 10);
-                    gr.FillRectangle(new SolidBrush(Color.Goldenrod), _rect);
+                    points.Add(new Point(point.X * 10 + standartOffset + width / 2, 
+                        point.Y * 10 + standartOffset + width / 2));
                 }
+                gr.DrawLines(new Pen(Color.Goldenrod, width), points.ToArray());
             }
+
             foreach (Element element in elements)
             {
                 Rectangle rect = new Rectangle(element.Rect.Location, element.Rect.Size);
@@ -157,19 +162,7 @@ namespace FormsElectronicCAD
                     gr.FillRectangle(new SolidBrush(Color.Gold), rect);
                 }
             }
-
-            /*ElementPlacement placer = new ElementPlacement();
-            List<List<Rectangle>> rects = placer.Placer(elements, standartOffset, X, Y);
-            foreach (Rectangle processor in rects[0])
-            {
-                gr.FillRectangle(new SolidBrush(Color.Gray), processor);
-            }
-            foreach (Rectangle leg in rects[1])
-            {
-                gr.FillRectangle(new SolidBrush(Color.Gold), leg);
-            }*/
-            //TODO: Paint Connections
-            Pen blackPen = new Pen(Color.Black, 3);
+            Pen blackPen = new Pen(Color.Black, 1);
             foreach (ConnectionData connection in connections)
             {
                 e.Graphics.DrawLine(blackPen,
@@ -180,6 +173,7 @@ namespace FormsElectronicCAD
 
         private void countObstacle()
         {
+            tracks.Clear();
             foreach (Element element in elements)
             {
                 for (int i = 0; i < element.Legs.Count; ++i)
@@ -189,15 +183,15 @@ namespace FormsElectronicCAD
                 }
             }
             WaveAlgo wave = new WaveAlgo(Convert.ToInt32(Xinput.Value), Convert.ToInt32(Yinput.Value));
-            List<Point> track = new List<Point>();
             foreach (ConnectionData connection in connections)
             {
+                List<Point> track = new List<Point>();
                 track = wave.CountTrack(obstacles, new Point(connection.X1, connection.Y1), new Point(connection.X2, connection.Y2));
                 foreach (Point point in track)
                 {
                     obstacles[point.X, point.Y] = true;
                 }
-                tracks.Add(track);
+                tracks.Add(track.ToArray());
             }
             Invalidation();
         }
@@ -307,7 +301,7 @@ namespace FormsElectronicCAD
             Xinput.Value = x;
             Yinput.Value = y;
             elements = new List<Element>();
-            tracks = new List<List<Point>>();
+            tracks = new List<Point[]>();
             obstacles = new bool[x, y];
             connections = new List<ConnectionData>();
             Invalidation();

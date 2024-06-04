@@ -1,65 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 
 namespace FormsElectronicCAD
 {
     internal class WaveAlgo
     {
-        //TODO: While path .....
-        /*public List<Point> CountTrack(bool[,] obst, Point point, Point end)
-        {
-            if ((Math.Abs(point.X - end.X) != 1 && point.Y == end.Y)
-                || (Math.Abs(point.Y - end.Y) != 1 && point.X == end.X))
-            {
-                return new List<Point>{point};
-            }
-            List<Point> pointsL = new List<Point>();
-            List<Point> pointsR = new List<Point>();
-            List<Point> pointsD = new List<Point>();
-            List<Point> pointsU = new List<Point>();
-            obst[point.X, point.Y] = true;
-            if (point.X - 1 >= 0 && !obst[point.X - 1, point.Y])
-            {
-                pointsL = CountTrack(obst, new Point(point.X - 1, point.Y), end);
-                pointsL.Add(point);
-            }
-            if (point.Y - 1 >= 0 && !obst[point.X, point.Y - 1])
-            {
-                pointsD = CountTrack(obst, new Point(point.X, point.Y - 1), end);
-                pointsD.Add(point);
-            }
-            if (point.X + 1 < obst.GetLength(0) && !obst[point.X + 1, point.Y])
-            {
-                pointsR = CountTrack(obst, new Point(point.X + 1, point.Y), end);
-                pointsR.Add(point);
-            }
-            if (point.Y + 1 < obst.GetLength(1) && !obst[point.X, point.Y + 1])
-            {
-                pointsU = CountTrack(obst, new Point(point.X, point.Y + 1), end);
-                pointsU.Add(point);
-            }
-            int[] lenght = { pointsL.Count, pointsR.Count, pointsD.Count, pointsU.Count };
-            int min = lenght.Where(x => x != 0).Min();
-            switch (min)
-            {
-                case 0:
-                    return pointsL;
-                case 1:
-                    return pointsR;
-                case 2:
-                    return pointsD;
-                case 3:
-                    return pointsU;
-                default: return pointsR;
-            }
-        }*/
         int[,] waves;
         List<Point> path = new List<Point>();
+        private int Xsize = 0;
+        private int Ysize = 0;
         public WaveAlgo(int xsize, int ysize)
         {
             waves = new int[xsize, ysize];
@@ -70,6 +21,8 @@ namespace FormsElectronicCAD
                     waves[i, j] = int.MaxValue;
                 }
             }
+            Xsize = xsize;
+            Ysize = ysize;
         }
         public List<Point> CountTrack(bool[,] obst, Point point, Point end)
         {
@@ -141,6 +94,7 @@ namespace FormsElectronicCAD
         }
         private void countPath(Point p, int d)
         {
+            path.Clear();
             path.Add(p);
             do
             {
@@ -164,6 +118,14 @@ namespace FormsElectronicCAD
                 d--;
             } 
             while (d > 0);
+            waves = new int[Xsize, Ysize];
+            for (int i = 0; i < waves.GetLength(0); i++)
+            {
+                for (int j = 0; j < waves.GetLength(1); j++)
+                {
+                    waves[i, j] = int.MaxValue;
+                }
+            }
         }
     }
 }
